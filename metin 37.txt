@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>X-CORE v6.0 | NEON PRESTIGE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --p: #7d5fff; --bg: #020205; --side: #08080c; --g: #00ff88; --r: #ff4757; }
+        
+        /* EKRAN SABİTLEME */
+        * { box-sizing: border-box; }
+        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Rajdhani', sans-serif; overflow: hidden; height: 100vh; width: 100vw; display: flex; }
+        
+        #matrix-bg { position: fixed; inset: 0; z-index: -1; opacity: 0.15; pointer-events: none; }
+
+        /* NEON DÖNEN IŞIK BUTON EFECTİ */
+        .neon-btn {
+            position: relative; padding: 15px 30px; color: #fff; background: #000;
+            text-transform: uppercase; letter-spacing: 2px; font-size: 14px;
+            font-family: 'Orbitron'; overflow: hidden; transition: 0.2s;
+            border: none; cursor: pointer; display: block; width: 100%; margin: 10px 0;
+        }
+        .neon-btn:hover { background: var(--p); box-shadow: 0 0 30px var(--p); }
+        .neon-btn span { position: absolute; display: block; }
+        .neon-btn span:nth-child(1) { top: 0; left: -100%; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, var(--p)); animation: btn1 2s linear infinite; }
+        @keyframes btn1 { 0% { left: -100%; } 50%,100% { left: 100%; } }
+        .neon-btn span:nth-child(2) { top: -100%; right: 0; width: 2px; height: 100%; background: linear-gradient(180deg, transparent, var(--p)); animation: btn2 2s linear infinite; animation-delay: .5s; }
+        @keyframes btn2 { 0% { top: -100%; } 50%,100% { top: 100%; } }
+        
+        /* AUTH GATE */
+        .auth-gate { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+        .admin-trigger { position: absolute; top: 20px; right: 20px; border: 1px solid var(--p); padding: 5px 15px; border-radius: 5px; cursor: pointer; color: var(--p); font-size: 12px; }
+
+        /* SIDEBAR & MAIN */
+        .sidebar { width: 280px; height: 100%; background: var(--side); border-right: 1px solid #1a1a25; padding: 25px; transition: 0.4s; z-index: 999; }
+        .main { flex: 1; padding: 40px; overflow-y: auto; height: 100vh; position: relative; }
+        .card { background: rgba(10,10,20,0.95); border: 1px solid #1a1a25; border-radius: 15px; padding: 25px; margin-bottom: 25px; }
+
+        .nav-item { padding: 14px; margin: 6px 0; cursor: pointer; color: #888; border-left: 3px solid transparent; transition: 0.3s; }
+        .nav-item:hover, .nav-active { background: rgba(125,95,255,0.1); color: #fff; border-left-color: var(--p); }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .admin-only { display: none; }
+
+        /* LOGOS */
+        .logos { display: flex; justify-content: center; gap: 30px; margin-top: 40px; opacity: 0.3; filter: brightness(0) invert(1); }
+        .logos img { height: 40px; }
+        
+        /* OPERATOR BADGE */
+        .op-badge { display: inline-block; padding: 5px 10px; border-radius: 5px; font-weight: bold; margin-bottom: 10px; font-size: 12px; display: none; }
+    </style>
+</head>
+<body onclick="document.getElementById('bgm').play()">
+
+<canvas id="matrix-bg"></canvas>
+<audio id="bgm" loop><source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" type="audio/mpeg"></audio>
+
+<div class="auth-gate" id="auth-gate">
+    <div class="admin-trigger" onclick="adminMode()">SYSTEM ADMIN ACCESS</div>
+    
+    <div id="user-box" style="width: 320px; text-align: center;">
+        <h2 style="font-family:'Orbitron'; color:var(--g)">X-CORE USER GATE</h2>
+        <input type="text" id="u_name" placeholder="Kullanıcı Adı">
+        <button class="neon-btn" onclick="userLogin()">
+            <span></span><span></span>GİRİŞ YAP
+        </button>
+        <p style="font-size: 12px; color: #555;">v6.0 Stable Connection</p>
+    </div>
+
+    <div id="admin-box" style="width: 320px; text-align: center; display: none;">
+        <h2 style="font-family:'Orbitron'; color:var(--p)">ADMIN ROOT LOGIN</h2>
+        <input type="password" id="a_pass" placeholder="Root Password">
+        <button class="neon-btn" onclick="adminLogin()" style="--p: #7d5fff">
+            <span></span><span></span>YETKİ VER
+        </button>
+    </div>
+</div>
+
+<div class="sidebar">
+    <div style="text-align:center; margin-bottom:30px;">
+        <h3 style="font-family:'Orbitron'; color:var(--p);">X-CORE HUB</h3>
+        <small id="status-tag">Status: Verified</small>
+    </div>
+    <div class="nav-item nav-active" onclick="switchTab('home', this)">🏠 ANA PANEL</div>
+    <div class="nav-item" onclick="switchTab('bomber', this)">💣 CALL BOMBER</div>
+    <div id="admin-nav" class="nav-item admin-only" onclick="switchTab('admin', this)">⚙️ ADMİN PANELİ</div>
+    <div class="nav-item" onclick="switchTab('about', this)">🏛️ KURUMSAL</div>
+    <div class="nav-item" onclick="location.reload()" style="color:var(--r); margin-top:30px;">🔒 ÇIKIŞ</div>
+</div>
+
+<div class="main">
+    <div id="tab-home" class="tab-content active">
+        <div class="card">
+            <h2 style="color:var(--p); font-family:'Orbitron'">DİKEY SİSTEM AKIŞI</h2>
+            <p>X-CORE v6.0 Hibrit sunucular aktif. Başarı oranı: %40. Yalova Node-7 bağlantısı kuruldu.</p>
+        </div>
+        <div class="card">
+            <h3>SUNUCU VERİLERİ</h3>
+            <p>Latency: 12ms | Uptime: %99.9 | Enc: AES-256</p>
+        </div>
+    </div>
+
+    <div id="tab-bomber" class="tab-content">
+        <div class="card">
+            <h2>BOMBER CONTROL v2</h2>
+            <div id="op-badge" class="op-badge"></div>
+            <input type="number" id="target" placeholder="5xx xxx xx xx" oninput="detectOp()">
+            <button class="neon-btn" onclick="startAttack()">
+                <span></span><span></span>SALDIRIYI BAŞLAT
+            </button>
+            <div id="console" style="display:none; background:#000; color:var(--g); font-family:monospace; padding:15px; margin-top:15px; border-radius:10px; text-align:left; font-size:13px;"></div>
+        </div>
+    </div>
+
+    <div id="tab-admin" class="tab-content">
+        <div class="card">
+            <h2 style="color:var(--g)">YÖNETİCİ PANELİ (ROOT)</h2>
+            <p>Toplam Kayıtlı Kullanıcı: 1,402</p>
+            <p>Aktif Trafik: 2.4 GB/s</p>
+        </div>
+    </div>
+
+    <div id="tab-about" class="tab-content">
+        <div class="card">
+            <h2>KURUMSAL KİMLİK</h2>
+            <p>X-CORE SOLUTIONS - Yalova Global siber istihbarat ağı.</p>
+            <div class="logos">
+                <img src="https://upload.wikimedia.org/wikipedia/tr/b/b3/BTK_Logo.png">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/5/5b/Europol_logo.svg">
+                <img src="https://upload.wikimedia.org/wikipedia/en/thumb/5/53/Interpol_Logo.svg/1200px-Interpol_Logo.svg.png">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function adminMode() {
+        document.getElementById('user-box').style.display = 'none';
+        document.getElementById('admin-box').style.display = 'block';
+    }
+
+    function userLogin() {
+        const u = document.getElementById('u_name').value;
+        if(u) {
+            document.getElementById('auth-gate').style.display = 'none';
+            document.getElementById('status-tag').innerText = 'User: ' + u;
+        } else { alert("İsim giriniz!"); }
+    }
+
+    function adminLogin() {
+        const p = document.getElementById('a_pass').value;
+        if(p === 'Yalova77!Siber') {
+            document.getElementById('auth-gate').style.display = 'none';
+            document.getElementById('admin-nav').style.display = 'block';
+            document.getElementById('status-tag').innerText = 'Root: ADMİN';
+        } else { alert("Hatalı Root Şifresi!"); }
+    }
+
+    function detectOp() {
+        const val = document.getElementById('target').value;
+        const badge = document.getElementById('op-badge');
+        badge.style.display = 'inline-block';
+        if(val.startsWith('53')) { badge.innerText = "HATTİ: TURKCELL"; badge.style.background = "#ffce00"; badge.style.color="#000"; }
+        else if(val.startsWith('54')) { badge.innerText = "HATTİ: VODAFONE"; badge.style.background = "#e74c3c"; badge.style.color="#fff"; }
+        else if(val.startsWith('50') || val.startsWith('55')) { badge.innerText = "HATTİ: TURK TELEKOM"; badge.style.background = "#0984e3"; badge.style.color="#fff"; }
+        else { badge.style.display = 'none'; }
+    }
+
+    function startAttack() {
+        const t = document.getElementById('target').value;
+        if(!t) return alert("Numara gir!");
+        const con = document.getElementById('console');
+        con.style.display = 'block'; con.innerHTML = "> Botlar uyandırılıyor...<br>";
+        setTimeout(() => { con.innerHTML += "> Sinyal protokolü yakalandı...<br>"; }, 1000);
+        setTimeout(() => { con.innerHTML += "> " + t + " numarasına saldırı başladı! [%40 Başarı]"; }, 2500);
+    }
+
+    function switchTab(t, el) {
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.getElementById('tab-' + t).classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('nav-active'));
+        el.classList.add('nav-active');
+    }
+
+    const canvas = document.getElementById('matrix-bg'); const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+    const drops = Array(Math.floor(canvas.width/16)).fill(1);
+    setInterval(() => {
+        ctx.fillStyle = "rgba(0,0,0,0.05)"; ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.fillStyle = "#0F0"; ctx.font = "15px monospace";
+        drops.forEach((y, i) => {
+            ctx.fillText(Math.floor(Math.random()*2), i*16, y*16);
+            if(y*16 > canvas.height && Math.random() > 0.98) drops[i] = 0; drops[i]++;
+        });
+    }, 50);
+</script>
+</body>
+</html>
