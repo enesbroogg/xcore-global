@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>X-CORE v25 | SAMANLI TERMINAL</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&family=Space+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root { --p: #a29bfe; --bg: #020205; --neon: #7d5fff; --g: #00ff88; --r: #ff4d4d; --gray: #888; }
+        * { box-sizing: border-box; font-family: 'Rajdhani', sans-serif; }
+        
+        /* HER YERDE DÖNEN RGB NEON BORDER */
+        body::before { content: ""; position: fixed; inset: 0; border: 5px solid transparent; border-image: linear-gradient(var(--angle), #7d5fff, #00ff88, #ff4d4d, #7d5fff) 1; animation: rotateBorder 3s linear infinite; z-index: 9999; pointer-events: none; }
+        @property --angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+        @keyframes rotateBorder { to { --angle: 360deg; } }
+
+        body { margin: 0; background: var(--bg); color: #fff; overflow: hidden; height: 100vh; }
+        /* ARKA PLAN AKAN YAZILAR (DAHA BELİRGİN) */
+        canvas { position: fixed; inset: 0; z-index: -1; opacity: 0.4; }
+
+        .sidebar { position: fixed; left: -280px; top: 0; width: 280px; height: 100%; background: rgba(5,5,10,0.98); border-right: 1px solid var(--neon); z-index: 2500; transition: 0.5s; padding: 20px; overflow-y: auto; }
+        .sidebar.open { left: 0; box-shadow: 10px 0 30px rgba(125,95,255,0.2); }
+        .sidebar div { padding: 15px; cursor: pointer; color: #ccc; border-bottom: 1px solid #111; font-family: 'Space Mono', monospace; font-size: 14px; transition: 0.3s; }
+        .sidebar div:hover { color: var(--neon); padding-left: 25px; }
+
+        .menu-btn { position: fixed; top: 20px; left: 20px; z-index: 2600; font-size: 35px; color: var(--neon); cursor: pointer; text-shadow: 0 0 10px var(--neon); }
+
+        .content { height: 100vh; overflow-y: auto; padding: 100px 20px 150px 20px; }
+        .card { background: rgba(0,0,0,0.9); border: 1px solid #1a1a2e; border-radius: 8px; padding: 25px; margin-bottom: 25px; border-left: 5px solid var(--neon); }
+
+        /* GİRİŞ EKRANI NEON TABELA EFEKTİ */
+        .auth-box { width: 85%; max-width: 380px; padding: 40px; background: #000; position: relative; text-align: center; border: 2px solid #111; }
+        .auth-box::before { content: ""; position: absolute; inset: -5px; border: 2px solid transparent; border-image: linear-gradient(var(--angle), var(--neon), #00ff88, var(--r), var(--neon)) 1; animation: rotateBorder 2s linear infinite; z-index: -1; filter: blur(5px); }
+
+        input { background: #080808; border: 1px solid #333; color: var(--g); padding: 15px; width: 100%; margin: 10px 0; font-family: 'Space Mono'; outline: none; }
+        input:focus { border-color: var(--neon); }
+        .neon-btn { background: var(--neon); color: #000; border: none; padding: 15px; width: 100%; cursor: pointer; font-family: 'Orbitron'; font-weight: bold; font-size: 13px; transition: 0.3s; }
+        .neon-btn:hover { box-shadow: 0 0 20px var(--neon); transform: scale(1.02); }
+
+        .log-box { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--g); background: #000; padding: 15px; border: 1px solid #222; min-height: 120px; line-height: 1.6; }
+        .wa-float { position: fixed; bottom: 30px; left: 30px; width: 65px; height: 65px; background: #25d366; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 3000; box-shadow: 0 0 20px #25d366; cursor: pointer; }
+        
+        .ifsa-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #111; color: #eee; }
+    </style>
+</head>
+<body onclick="initAudio()">
+
+<canvas id="canvas"></canvas>
+
+<audio id="bg-audio" loop>
+    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+</audio>
+
+<div class="menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</div>
+
+<div id="auth-gate" style="position:fixed; inset:0; background:#000; z-index:10000; display:flex; align-items:center; justify-content:center;">
+    <div class="auth-box">
+        <h2 style="font-family:'Orbitron'; color: #fff; letter-spacing: 3px;">ERİŞİM PANELİ</h2>
+        <p style="font-size: 10px; color: var(--gray);">YALOVA / SAMANLI NODE BAĞLANTISI</p>
+        <input type="password" id="entry-pass" placeholder="ŞİFREYİ GİRİN">
+        <button class="neon-btn" onclick="login()">SİSTEME SIZ</button>
+    </div>
+</div>
+
+<div class="sidebar" id="sidebar">
+    <h3 style="font-family:'Orbitron'; text-align:center; color:var(--neon); margin-bottom:20px;">X-CORE v25</h3>
+    <div onclick="showTab('home')">🏠 ANA SAYFA</div>
+    <div onclick="showTab('sorgu')">🔍 SORGU PANELİ</div>
+    <div onclick="showTab('ig-access')">📸 INSTAGRAM ERİŞİM</div>
+    <div onclick="showTab('wa-access')">🟢 WHATSAPP (YAKINDA)</div>
+    <div onclick="showTab('bomber')">💣 CALL BOMBER</div>
+    <div onclick="showTab('ifsa')">🔞 İFŞA ARŞİVİ</div>
+    <div onclick="showTab('device')">📍 KONUM TAKİBİ</div>
+    <div onclick="showTab('destek')">🆘 DESTEK</div>
+</div>
+
+<div class="content">
+    <div id="tab-home" class="tab-content active">
+        <div class="card" style="text-align:center;">
+            <h2 style="font-family:'Orbitron'; color:var(--neon);">SİSTEM DURUMU: AKTİF</h2>
+            <p style="color:var(--gray);">Yalova Samanlı ana sunucusuna tünel bağlantısı başarılı.</p>
+            <div style="margin: 30px 0;"><div class="auth-box" style="padding:10px; display:inline-block; width:auto;">SAMANLI_NODE_01</div></div>
+            
+            <div style="background:rgba(0,0,0,0.8); padding:15px; border:1px solid #111; margin-top:40px;">
+                <span style="color:var(--neon); font-size:10px; font-weight:bold;">CANLI ERİŞİM VERİLERİ:</span><br>
+                <span id="recent-log" style="color:var(--g); font-family:'Space Mono'; font-size:14px;">185.77.22.XX [YALOVA_MERKEZ]</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-sorgu" class="tab-content">
+        <div class="card" style="text-align:center;">
+            <h3 style="color:var(--r);">⚠️ SİSTEM BAKIMDA</h3>
+            <p>Türkiye'nin en iyi ve en hızlı sorgu sistemiyle yakında geliyoruz. Beklemede kalın usta! 🚀💎</p>
+            <div style="font-size:12px; color:var(--gray); margin-top:10px;">Versiyon: 4.0.1 (Yalova Build)</div>
+        </div>
+    </div>
+
+    <div id="tab-ig-access" class="tab-content">
+        <div class="card" style="text-align:center;">
+            <h3>INSTAGRAM ERİŞİM</h3>
+            <input type="text" id="ig-user" placeholder="Kullanıcı adı girin (Örn: syavuz.77)">
+            <button class="neon-btn" onclick="startInsta()">VERİLERİ ÇEK</button>
+            <div id="ig-res" style="display:none; margin-top:20px;">
+                <img id="ig-pfp" src="" style="width:110px; height:110px; border-radius:50%; border:3px solid var(--neon); box-shadow: 0 0 15px var(--neon);">
+                <div id="ig-logs" class="log-box" style="margin-top:15px; text-align:left;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-bomber" class="tab-content">
+        <div class="card" style="text-align:center;">
+            <h3>CALL BOMBER v5.0</h3>
+            <input type="number" id="bomb-num" placeholder="905xxxxxxxxx">
+            <button class="neon-btn" onclick="startBomber()">SALDIRIYI BAŞLAT</button>
+            <div id="bomb-status" class="log-box" style="display:none; margin-top:15px;"></div>
+        </div>
+    </div>
+
+    <div id="tab-ifsa" class="tab-content">
+        <div class="card">
+            <h3 style="color:var(--r);">🔞 GİZLİ SAMANLI ARŞİVİ</h3>
+            <div class="ifsa-item"><span>Mert Eren</span> <button class="neon-btn" style="width:auto; padding:5px 15px;">GÖR</button></div>
+            <div class="ifsa-item"><span>Ali Mahdi</span> <button class="neon-btn" style="width:auto; padding:5px 15px;">GÖR</button></div>
+            <div class="ifsa-item"><span>İbrahim Akbalık</span> <button class="neon-btn" style="width:auto; padding:5px 15px;">GÖR</button></div>
+            <div class="ifsa-item"><span>Elif Şevval Çalışkan</span> <button class="neon-btn" style="width:auto; padding:5px 15px;">GÖR</button></div>
+            <div class="ifsa-item"><span>Lilian</span> <button class="neon-btn" style="width:auto; padding:5px 15px;">GÖR</button></div>
+            <div class="ifsa-item"><span>Fatih Kaya</span> <button class="neon-btn" style="width:auto; padding:5px 15px;">GÖR</button></div>
+        </div>
+    </div>
+
+    <div id="tab-device" class="tab-content">
+        <div class="card" style="text-align:center;">
+            <h3>ANLIK GPS KONUM TAKİBİ</h3>
+            <input type="text" placeholder="Hedef Ad Soyad">
+            <input type="number" id="track-num" placeholder="Telefon Numarası">
+            <button class="neon-btn" onclick="startTrack()">SİNYALİ YAKALA</button>
+            <div id="track-res" class="log-box" style="display:none; margin-top:15px;"></div>
+        </div>
+    </div>
+</div>
+
+<a href="https://wa.me/212618074874" class="wa-float">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" width="38">
+</a>
+
+<script>
+    const pass = "Core2024";
+    const audio = document.getElementById('bg-audio');
+
+    // Müzik Başlatma Fonksiyonu (Daha Sağlam)
+    function initAudio() {
+        if(audio.paused) {
+            audio.currentTime = 30; // 30. saniyeden başla
+            audio.volume = 0.5; // %50 ses seviyesi
+            audio.play().catch(e => console.log("Müzik tetiklenemedi"));
+        }
+    }
+
+    function login() {
+        if(document.getElementById('entry-pass').value === pass) {
+            document.getElementById('auth-gate').style.display='none';
+            initAudio(); // Girişte müziği zorla
+        } else alert("HATALI ERİŞİM KODU!");
+    }
+
+    function showTab(id) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.getElementById('tab-' + id).classList.add('active');
+        document.getElementById('sidebar').classList.remove('open');
+    }
+
+    // IP LOG SİSTEMİ (40 Saniyede Bir Değişir)
+    const ipLogs = [
+        "185.77.22.104 [YALOVA_MERKEZ]", 
+        "88.231.45.21 [YALOVA_SAMANLI]", 
+        "94.55.112.09 [YALOVA_CIFTLIKKOY]", 
+        "176.40.11.88 [YALOVA_MERKEZ_V2]"
+    ];
+    setInterval(() => {
+        document.getElementById('recent-log').innerText = ipLogs[Math.floor(Math.random()*ipLogs.length)];
+    }, 40000);
+
+    // INSTAGRAM FIX
+    function startInsta() {
+        let user = document.getElementById('ig-user').value.trim();
+        if(!user) return alert("Kullanıcı adı girilmedi!");
+        user = user.replace('@', '');
+        const res = document.getElementById('ig-res');
+        res.style.display = 'block';
+        document.getElementById('ig-pfp').src = `https://unavatar.io/instagram/${user}`;
+        document.getElementById('ig-logs').innerHTML = "> Hedef taranıyor...<br>> Profil verileri çekildi ✅<br>> Post ve Takipçi analizi tamam.<br>> Lütfen bu kodu yöneticiye iletin: IG-77-X";
+    }
+
+    // CALL BOMBER YAVAŞLATILDI
+    function startBomber() {
+        const s = document.getElementById('bomb-status');
+        s.style.display = 'block';
+        s.innerHTML = "> Saldırı motoru ateşleniyor...<br>";
+        let i = 5;
+        let t = setInterval(() => {
+            s.innerHTML += `> API kanalı ${6-i} üzerinden veri gönderiliyor...<br>`;
+            i--;
+            if(i <= 0) {
+                clearInterval(t);
+                s.innerHTML += "<br><span style='color:var(--neon)'>İŞLEM ONAYLANDI: 12 saat içinde yoğun gönderim tamamlanacaktır.</span>";
+            }
+        }, 1500);
+    }
+
+    // KONUM TAKİBİ (30 SN BEKLEMELİ)
+    function startTrack() {
+        const res = document.getElementById('track-res');
+        res.style.display = 'block';
+        res.innerHTML = "Uydularla senkronize olunuyor... [30 Saniye Bekleyin]<br>";
+        
+        let codes = ["X-RAY: OK", "SIGNAL_DIST: 12km", "BOUNCING_IP: ENABLED", "TRACE_ROUTE: SUCCESS"];
+        let count = 0;
+        let loop = setInterval(() => {
+            res.innerHTML += `> ${codes[count % 4]}...<br>`;
+            count++;
+            if(count > 12) {
+                clearInterval(loop);
+                res.innerHTML += "<br><span style='color:var(--r)'>KONUM: YALOVA / MERKEZ<br>Detaylı sokak görünümü için kodu iletin: LOC-SAM-77</span>";
+            }
+        }, 2500);
+    }
+
+    // MATRIX ARKA PLAN (DAHA BELİRGİN)
+    const canvas = document.getElementById('canvas'); const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+    const drops = Array(Math.floor(canvas.width/16)).fill(1);
+    function draw() {
+        ctx.fillStyle = "rgba(0,0,0,0.05)"; ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.fillStyle = "#7d5fff"; ctx.font = "18px monospace"; // Daha büyük ve parlak
+        drops.forEach((y, i) => {
+            ctx.fillText(Math.floor(Math.random()*2), i*16, y*16);
+            if(y*16 > canvas.height && Math.random() > 0.98) drops[i] = 0; drops[i]++;
+        });
+    }
+    setInterval(draw, 50);
+</script>
+</body>
+</html>
