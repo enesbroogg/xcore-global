@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>X-CORE v18 | VIP NEON</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --p: #a29bfe; --bg: #020205; --neon: #7d5fff; --g: #00ff88; --r: #ff4d4d; }
+        * { box-sizing: border-box; font-family: 'Rajdhani', sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        /* HER YERDE DÖNEN NEON IŞIK (BORDER) */
+        body::before { content: ""; position: fixed; inset: 0; border: 4px solid transparent; border-image: linear-gradient(var(--angle), #7d5fff, #00ff88, #ff4d4d, #7d5fff) 1; animation: rotateBorder 4s linear infinite; z-index: 9999; pointer-events: none; }
+        @property --angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+        @keyframes rotateBorder { to { --angle: 360deg; } }
+
+        body { margin: 0; background: var(--bg); color: #fff; overflow: hidden; height: 100vh; }
+        canvas { position: fixed; inset: 0; z-index: -1; opacity: 0.2; }
+
+        .sidebar { position: fixed; left: -280px; top: 0; width: 280px; height: 100%; background: rgba(5,5,10,0.98); border-right: 2px solid var(--neon); z-index: 2500; transition: 0.5s; padding: 20px; overflow-y: auto; }
+        .sidebar.open { left: 0; }
+        .menu-btn { position: fixed; top: 20px; left: 20px; z-index: 2600; font-size: 30px; color: var(--neon); cursor: pointer; text-shadow: 0 0 10px var(--neon); }
+
+        .content { height: 100vh; overflow-y: auto; padding: 80px 20px 120px 20px; scroll-behavior: smooth; }
+        .card { background: rgba(10,10,20,0.9); border: 1px solid #1a1a2e; border-radius: 12px; padding: 20px; margin-bottom: 20px; position: relative; }
+        
+        /* İFŞA TASARIMI */
+        .ifsa-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #111; background: rgba(255,255,255,0.02); margin-bottom: 5px; }
+        .btn-view { background: var(--g); color: #000; padding: 5px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; border: none; }
+
+        /* KASET & LOGO */
+        .cassette { width: 100px; height: 100px; border: 3px solid var(--neon); border-radius: 50%; margin: 0 auto; animation: spin 5s linear infinite; box-shadow: 0 0 20px var(--neon); }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .footer-logo { opacity: 0.1; width: 150px; display: block; margin: 50px auto; filter: grayscale(1); }
+
+        input { background: #000; border: 1px solid #222; color: var(--g); padding: 12px; width: 100%; margin: 10px 0; border-radius: 5px; outline: none; }
+        .neon-btn { background: var(--neon); color: #000; font-weight: bold; padding: 12px; width: 100%; border: none; cursor: pointer; font-family: 'Orbitron'; }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+    </style>
+</head>
+<body onclick="playMusic()">
+
+<canvas id="canvas"></canvas>
+
+<audio id="bg-music" loop>
+    <source src="https://files.freemusicarchive.org/storage-freemusicarchive-org/music/no_curator/Ketsa/Night_Walk/Ketsa_-_02_-_C-95.mp3" type="audio/mpeg">
+</audio>
+
+<div class="menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</div>
+
+<div id="auth-gate" style="position:fixed; inset:0; background:#000; z-index:10000; display:flex; align-items:center; justify-content:center;">
+    <div style="width:85%; max-width:350px; border:2px solid var(--neon); padding:30px; border-radius:15px; background:rgba(10,10,20,0.95); box-shadow: 0 0 30px var(--neon);">
+        <h1 style="font-family:'Orbitron'; color:var(--neon); text-align:center;">X-CORE ACCESS</h1>
+        <input type="password" id="entry-pass" placeholder="ŞİFREYİ GİR">
+        <button class="neon-btn" onclick="login()">SİSTEME GİRİŞ</button>
+    </div>
+</div>
+
+<div class="sidebar" id="sidebar">
+    <h2 style="font-family:'Orbitron'; color:var(--neon); text-align:center;">X-MENU</h2>
+    <div onclick="showTab('home')" style="padding:15px; cursor:pointer;">🏠 ANA SAYFA</div>
+    <div onclick="showTab('sorgu')" style="padding:15px; cursor:pointer; color:var(--g)">🔍 SORGU PANELİ</div>
+    <div onclick="showTab('bomber')" style="padding:15px; cursor:pointer;">💣 CALL BOMBER</div>
+    <div onclick="showTab('ifsa')" style="padding:15px; cursor:pointer; color:var(--r)">🔞 İFŞA ARŞİVİ</div>
+    <div onclick="showTab('vpn')" style="padding:15px; cursor:pointer;">🛡️ VPN & PROXY</div>
+    <div onclick="showTab('duyuru')" style="padding:15px; cursor:pointer;">📢 DUYURULAR</div>
+    <div onclick="showTab('hakkinda')" style="padding:15px; cursor:pointer; color:var(--p)">ℹ️ SİTE HAKKINDA</div>
+    <div onclick="showTab('destek')" style="padding:15px; cursor:pointer; color:orange;">🆘 YARDIM / DESTEK</div>
+</div>
+
+<div class="content">
+    <div id="tab-home" class="tab-content active">
+        <div class="card" style="text-align:center;">
+            <h2 style="font-family:'Orbitron'; color:var(--neon);">YALOVA SAMANLI NODE</h2>
+            <div class="cassette"></div>
+            <p style="color:var(--g); margin-top:15px; font-family:'Orbitron'; font-size:12px;">SONG: CYBER_GHOST_REMIX.mp3</p>
+        </div>
+    </div>
+
+    <div id="tab-ifsa" class="tab-content">
+        <div class="card">
+            <h3 style="color:var(--r); border-bottom:1px solid #333; padding-bottom:10px;">🔞 GİZLİ ARŞİV</h3>
+            <div class="ifsa-row"><span>Ah*** Be*** Ek***</span> <button class="btn-view">İFŞA GÖR</button></div>
+            <div class="ifsa-row"><span>El*** Şe*** Ça***</span> <button class="btn-view">İFŞA GÖR</button></div>
+            <div class="ifsa-row"><span>Em*** Ca***</span> <button class="btn-view">İFŞA GÖR</button></div>
+            <div class="ifsa-row"><span>Li***sn</span> <button class="btn-view">İFŞA GÖR</button></div>
+            <div class="ifsa-row"><span>Fa*** Ka***</span> <button class="btn-view">İFŞA GÖR</button></div>
+            <div class="ifsa-row"><span>İb*** Ak***</span> <button class="btn-view">İFŞA GÖR</button></div>
+            <div class="ifsa-row"><span>Si*** Ga***</span> <button class="btn-view">İFŞA GÖR</button></div>
+        </div>
+    </div>
+
+    <div id="tab-bomber" class="tab-content">
+        <div class="card">
+            <h3>💣 CALL BOMBER v4.2</h3>
+            <input type="number" id="target-phone" placeholder="905xx xxx xx xx">
+            <button class="neon-btn" onclick="startBomber()">SALDIRIYI BAŞLAT</button>
+            <div id="bomber-status" style="margin-top:15px; font-family:monospace; font-size:12px; color:var(--g)"></div>
+        </div>
+    </div>
+
+    <div id="tab-hakkinda" class="tab-content">
+        <div class="card">
+            <h3 style="color:var(--p)">X-CORE GLOBAL HAKKINDA</h3>
+            <p style="font-size:14px; line-height:1.6; color:#ccc;">
+                X-CORE Global, 2024 yılında Yalova Samanlı merkezli bir siber güvenlik ve veri analiz projesi olarak hayata geçirilmiştir. Amacımız, Türkiye'nin en karmaşık sorgu ve analiz altyapısını tek bir çatı altında toplamaktır. Sistemimiz, derin web katmanlarından gelen verileri anlık olarak işleyerek kullanıcılarına sunar. VPN entegrasyonu, Call Bomber servisleri ve siber istihbarat modülleriyle profesyonel bir deneyim sunuyoruz. <br><br>
+                Bu platform, tamamen özel şifreleme yöntemleriyle korunmakta olup, her kullanıcıya özel atanmış bir node üzerinden hizmet verir. Samanlı veri merkezimizdeki sunucular, 7/24 kesintisiz bağlantı garantisiyle çalışır. Bizi tercih ettiğiniz için teşekkürler.
+            </p>
+            <img src="https://logodix.com/logo/1004664.png" class="footer-logo">
+        </div>
+    </div>
+
+    <div id="tab-vpn" class="tab-content"><div class="card"><h3>VPN SHIELD</h3><p>Bağlantınız Samanlı üzerinden şifreleniyor...</p></div></div>
+    <div id="tab-duyuru" class="tab-content"><div class="card"><h3>📢 DUYURULAR</h3><p>• Yeni ifşa dosyaları eklendi.<br>• Altyapı v18'e yükseltildi.</p></div></div>
+    <div id="tab-destek" class="tab-content"><div class="card"><h3>🆘 YARDIM</h3><p>Destek Hattı: xpanelproje@proton.me</p></div></div>
+</div>
+
+<script>
+    const pass = "Core2024";
+    function login() {
+        if(document.getElementById('entry-pass').value === pass) document.getElementById('auth-gate').style.display='none';
+        else alert("Düzgün yaz şu şifreyi usta!");
+    }
+
+    function showTab(id) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.getElementById('tab-' + id).classList.add('active');
+        document.getElementById('sidebar').classList.remove('open');
+    }
+
+    function playMusic() { document.getElementById('bg-music').play().catch(()=>{}); }
+
+    function startBomber() {
+        const num = document.getElementById('target-phone').value;
+        const status = document.getElementById('bomber-status');
+        if(!num) return alert("Numara yaz lan!");
+        status.innerHTML = "SİNYAL GÖNDERİLİYOR...<br>";
+        let count = 0;
+        let int = setInterval(() => {
+            status.innerHTML += `API ${Math.floor(Math.random()*20)}: ${num} Arandı! ✅<br>`;
+            count++;
+            if(count > 10) { clearInterval(int); status.innerHTML += "İŞLEM TAMAMLANDI!"; }
+        }, 800);
+    }
+
+    // Matrix
+    const canvas = document.getElementById('canvas'); const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+    const drops = Array(Math.floor(canvas.width/16)).fill(1);
+    function draw() {
+        ctx.fillStyle = "rgba(0,0,0,0.05)"; ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.fillStyle = "#7d5fff"; ctx.font = "15px monospace";
+        drops.forEach((y, i) => {
+            ctx.fillText(Math.floor(Math.random()*2), i*16, y*16);
+            if(y*16 > canvas.height && Math.random() > 0.98) drops[i] = 0; drops[i]++;
+        });
+    }
+    setInterval(draw, 50);
+</script>
+</body>
+</html>
