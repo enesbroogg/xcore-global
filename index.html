@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>X-CORE v15 | SAMANLI NODE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --p: #a29bfe; --bg: #010103; --neon: #7d5fff; --g: #00ff88; --r: #ff4d4d; }
+        * { box-sizing: border-box; font-family: 'Rajdhani', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; background: var(--bg); color: #fff; overflow: hidden; height: 100vh; }
+        canvas { position: fixed; inset: 0; z-index: -1; opacity: 0.3; }
+
+        .sidebar { position: fixed; left: -280px; top: 0; width: 280px; height: 100%; background: rgba(2,2,5,0.98); border-right: 2px solid var(--neon); z-index: 2500; transition: 0.5s; padding: 20px; }
+        .sidebar.open { left: 0; box-shadow: 10px 0 30px rgba(125,95,255,0.2); }
+        .menu-btn { position: fixed; top: 15px; left: 15px; z-index: 2600; font-size: 30px; color: var(--neon); cursor: pointer; }
+
+        .card { background: rgba(10,10,20,0.9); border: 1px solid #1a1a2e; border-radius: 12px; padding: 20px; margin-bottom: 20px; border-left: 4px solid var(--neon); }
+        .neon-btn { background: transparent; border: 1px solid var(--neon); color: #fff; padding: 12px; font-family: 'Orbitron'; cursor: pointer; width: 100%; margin-top: 10px; transition: 0.3s; font-size: 12px; }
+        .neon-btn:hover { background: var(--neon); color: #000; box-shadow: 0 0 20px var(--neon); }
+        
+        input { background: rgba(0,0,0,0.7); border: 1px solid #333; color: var(--g); padding: 12px; width: 100%; margin: 8px 0; border-radius: 5px; outline: none; border-bottom: 2px solid var(--neon); }
+
+        /* IP SORGU EKRANI (KARMAŞIK) */
+        #ip-res { margin-top: 15px; display: none; background: #000; padding: 15px; border: 1px solid #222; font-family: monospace; font-size: 12px; line-height: 1.5; }
+        .hex-data { color: #444; word-break: break-all; }
+        .found-loc { color: var(--g); font-weight: bold; border-bottom: 1px dashed var(--g); }
+
+        #ai-chat { position: fixed; bottom: 85px; right: 20px; width: 280px; background: #050508; border: 1px solid var(--neon); border-radius: 15px; display: none; z-index: 3000; }
+        .chat-header { background: var(--neon); color: #000; padding: 10px; border-radius: 14px 14px 0 0; font-weight: bold; font-size: 13px; }
+        #chat-content { height: 220px; overflow-y: auto; padding: 10px; font-size: 13px; }
+
+        .tab-content { display: none; padding-top: 70px; height: 100vh; overflow-y: auto; padding-left: 15px; padding-right: 15px; }
+        .tab-content.active { display: block; }
+    </style>
+</head>
+<body onclick="playMusic()">
+
+<canvas id="canvas"></canvas>
+
+<audio id="bg-music" loop>
+    <source src="https://files.freemusicarchive.org/storage-freemusicarchive-org/music/no_curator/Ketsa/Night_Walk/Ketsa_-_04_-_Sorrow_The_End.mp3" type="audio/mpeg">
+</audio>
+
+<div class="menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</div>
+
+<div id="auth-gate" style="position:fixed; inset:0; background:#000; z-index:10000; display:flex; align-items:center; justify-content:center; text-align:center;">
+    <div style="width:85%; max-width:350px;">
+        <h1 style="font-family:'Orbitron'; color:var(--neon);">X-CORE v15</h1>
+        <input type="password" id="entry-pass" placeholder="ŞİFREYİ GİR LAN">
+        <button class="neon-btn" onclick="login()">SİSTEME SIZ</button>
+        <p id="err-msg" style="font-size:11px; color:#333; margin-top:15px;"></p>
+    </div>
+</div>
+
+<div class="sidebar" id="sidebar">
+    <h2 style="font-family:'Orbitron'; color:var(--neon); text-align:center;">SİBER-PANEL</h2>
+    <div style="padding:12px; cursor:pointer;" onclick="showTab('home')">🏠 ANA PANEL</div>
+    <div style="padding:12px; cursor:pointer; color:var(--g)" onclick="showTab('ip')">📍 SAMANLI-LOCATOR</div>
+    <div style="padding:12px; cursor:pointer;" onclick="showTab('ifsa')">🔞 İFŞA ARŞİVİ</div>
+    <div style="padding:12px; cursor:pointer; color:var(--r)" onclick="location.reload()">🔒 ÇIKIŞ</div>
+</div>
+
+<div class="content">
+    <div id="tab-home" class="tab-content active">
+        <div class="card">
+            <h2 style="font-family:'Orbitron'; color:var(--neon); margin:0;">YALOVA NODE v15</h2>
+            <p style="font-size:14px; color:#666;">Samanlı veri tabanı üzerinden 2024 aktif bypass hattı.</p>
+        </div>
+        <div class="card" style="border-left-color: var(--g);">
+            <h3 style="color:var(--g); margin:0;">📢 SİSTEM DURUMU</h3>
+            <p style="font-size:13px;">• Samanlı IP Tunneling: %100 Aktif<br>• Yalova Merkez Sorgu: Online</p>
+        </div>
+    </div>
+
+    <div id="tab-ip" class="tab-content">
+        <div class="card">
+            <h3>📍 IP TESPİT MERKEZİ</h3>
+            <input type="text" id="ip-inp" placeholder="Target IP (Örn: 185.77.xx.xx)">
+            <button class="neon-btn" onclick="trackIP()">DERİN TARAMAYI BAŞLAT</button>
+            
+            <div id="ip-res">
+                <div class="hex-data">0x53 0x41 0x4D 0x41 0x4E 0x4C 0x49 0x5F 0x44 0x41 0x54 0x41</div>
+                <div id="loading-proc" style="color:var(--neon); margin:5px 0;">TARANIYOR...</div>
+                <div id="final-res" style="display:none;">
+                    <span class="found-loc">KONUM TESPİT EDİLDİ: YALOVA / SAMANLI</span><br>
+                    <span style="color:#444;">LAT: 40.6549 | LONG: 29.2738</span><br>
+                    <span class="hex-data">MAC: 00:1A:2B:3C:4D:5E_SAMANLI_SSID</span><br>
+                    <span style="color:var(--g)">Kullanıcı şu an Samanlı bölgesinde aktif sinyal veriyor.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-ifsa" class="tab-content">
+        <div class="card"><h3>🔞 İFŞA ARŞİVİ</h3><p>Ahmet Berat Ekici, Elif Şevval ve Samanlı ekibi dosyaları.</p><button class="neon-btn">DOSYALARI ÇIKAR</button></div>
+    </div>
+</div>
+
+<div id="ai-chat">
+    <div class="chat-header">X-BOT (SAMANLI MERKEZ) 🤖</div>
+    <div id="chat-content">
+        <div class="chat-bot">Bot: Ne var usta? Samanlı'dan selamlar. Bişey mi sorcan? 🤨</div>
+    </div>
+    <div style="padding:10px; display:flex; background:#000; border-radius:0 0 15px 15px;">
+        <input type="text" id="chat-inp" placeholder="Düzgün bişey yaz..." style="margin:0; font-size:12px;">
+        <button onclick="sendChat()" style="background:var(--neon); color:#000; border:none; padding:5px 10px; cursor:pointer; font-weight:bold;">➔</button>
+    </div>
+</div>
+
+<div style="position:fixed; bottom:20px; right:20px; display:flex; flex-direction:column; gap:10px; z-index:3000;">
+    <div onclick="toggleChat()" style="background:var(--neon); color:#000; padding:10px 15px; border-radius:50px; cursor:pointer; font-weight:bold; font-size:12px;">7/24 YALOVA DESTEK</div>
+    <a href="https://wa.me/212618074874" style="background:#25d366; color:#fff; padding:10px 15px; border-radius:50px; text-decoration:none; font-weight:bold; font-size:12px;">WHATSAPP</a>
+</div>
+
+<script>
+    const pass = "Core2024";
+    function login() {
+        const p = document.getElementById('entry-pass').value;
+        if(p === pass) document.getElementById('auth-gate').style.display='none';
+        else {
+            document.getElementById('err-msg').innerText = "Oğlum şifreyi düzgün yazsana, hayırdır? 🤨";
+            document.getElementById('err-msg').style.color = "var(--r)";
+        }
+    }
+
+    function showTab(id) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.getElementById('tab-' + id).classList.add('active');
+        document.getElementById('sidebar').classList.remove('open');
+    }
+
+    function playMusic() { document.getElementById('bg-music').play().catch(()=>{}); }
+
+    function trackIP() {
+        const res = document.getElementById('ip-res');
+        const load = document.getElementById('loading-proc');
+        const final = document.getElementById('final-res');
+        const locs = ["Yalova / Samanlı (Merkez)", "Yalova / Samanlı (Köy İçi)", "Yalova / Merkez", "Yalova / Samanlı (Üst Yol)"];
+        
+        res.style.display = 'block';
+        final.style.display = 'none';
+        load.innerText = "YALOVA NODE BAĞLANTISI KURULUYOR...";
+        
+        setTimeout(() => {
+            load.innerText = "0x73 0x61 0x6D 0x61 0x6E 0x6C 0x69 BYPASS AKTİF...";
+            setTimeout(() => {
+                load.style.display = 'none';
+                final.style.display = 'block';
+                document.querySelector('.found-loc').innerText = "KONUM TESPİT EDİLDİ: " + locs[Math.floor(Math.random()*locs.length)];
+            }, 2000);
+        }, 1500);
+    }
+
+    function toggleChat() { 
+        const c = document.getElementById('ai-chat');
+        c.style.display = (c.style.display === 'none') ? 'block' : 'none';
+    }
+
+    function sendChat() {
+        const inp = document.getElementById('chat-inp');
+        const cont = document.getElementById('chat-content');
+        if(!inp.value) return;
+        cont.innerHTML += `<div style="color:var(--p); text-align:right;">Sen: ${inp.value}</div>`;
+        
+        let msg = inp.value.toLowerCase();
+        let reply = "Oğlum düzgün yaz anlamıyorum, Samanlı çocuğuyla doğru konuş! 🤨";
+        
+        if(msg.includes("merhaba") || msg.includes("selam")) reply = "Aleykümselam usta. Samanlı'da çay içiyoruz, ne lazım? 😎";
+        if(msg.includes("nerelisin")) reply = "Yalova Samanlı çocuğuyuz usta, hayırdır? 🦾";
+        if(msg.includes("sorgu")) reply = "Sorguyu açtık usta, Samanlı'dan sinyal bekliyoruz. 🚀";
+
+        setTimeout(() => {
+            cont.innerHTML += `<div class="chat-bot">Bot: ${reply}</div>`;
+            cont.scrollTop = cont.scrollHeight;
+        }, 1000);
+        inp.value = "";
+    }
+
+    const canvas = document.getElementById('canvas'); const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+    const drops = Array(Math.floor(canvas.width/16)).fill(1);
+    function draw() {
+        ctx.fillStyle = "rgba(0,0,0,0.05)"; ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.fillStyle = "#7d5fff"; ctx.font = "15px monospace";
+        drops.forEach((y, i) => {
+            ctx.fillText(Math.floor(Math.random()*2), i*16, y*16);
+            if(y*16 > canvas.height && Math.random() > 0.98) drops[i] = 0; drops[i]++;
+        });
+    }
+    setInterval(draw, 50);
+</script>
+</body>
+</html>
