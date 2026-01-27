@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>X-CORE v32 | SAMANLI MEGA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Space+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root { --neon-purple: #bc13fe; --neon-green: #00ff88; --neon-blue: #00d2ff; --neon-red: #ff0055; --bg: #050505; }
+        * { box-sizing: border-box; font-family: 'Space Mono', monospace; }
+
+        body::after { content: ""; position: fixed; inset: 0; border: 6px solid transparent; border-image: linear-gradient(var(--angle), var(--neon-purple), var(--neon-green), var(--neon-blue), var(--neon-red), var(--neon-purple)) 1; animation: rotateBorder 4s linear infinite; z-index: 10001; pointer-events: none; }
+        @property --angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+        @keyframes rotateBorder { to { --angle: 360deg; } }
+
+        body { margin: 0; background: var(--bg); color: #fff; overflow: hidden; height: 100vh; }
+        canvas { position: fixed; inset: 0; z-index: -1; opacity: 0.5; }
+
+        .auth-box { width: 90%; max-width: 400px; padding: 50px; background: rgba(0,0,0,0.9); border: 2px solid #fff; box-shadow: 0 0 20px #fff, inset 0 0 20px #fff, 0 0 40px var(--neon-purple), inset 0 0 40px var(--neon-purple); text-align: center; }
+        .auth-box h2 { font-family: 'Orbitron'; color: #fff; text-shadow: 0 0 10px var(--neon-purple); letter-spacing: 5px; }
+
+        .menu-btn { position: fixed; top: 25px; left: 25px; z-index: 2600; font-size: 40px; color: var(--neon-green); cursor: pointer; }
+        .sidebar { position: fixed; left: -300px; top: 0; width: 300px; height: 100%; background: rgba(0,0,0,0.95); border-right: 2px solid var(--neon-blue); z-index: 2500; transition: 0.5s; padding: 30px; }
+        .sidebar.open { left: 0; box-shadow: 20px 0 50px rgba(0,210,255,0.3); }
+        .sidebar div { padding: 15px; color: #fff; border-bottom: 1px solid #222; cursor: pointer; font-size: 13px; }
+        .sidebar div:hover { background: var(--neon-purple); color: #000; }
+
+        .content { height: 100vh; overflow-y: auto; padding: 120px 20px 150px 20px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .card { background: rgba(10,10,15,0.9); border: 2px solid var(--neon-blue); box-shadow: 0 0 15px var(--neon-blue); padding: 30px; margin-bottom: 30px; position: relative; }
+
+        .spinner { width: 60px; height: 60px; border: 5px solid #111; border-top: 5px solid var(--neon-blue); border-radius: 50%; animation: spin 1s linear infinite; margin: 20px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .neon-btn { background: none; border: 2px solid var(--neon-green); color: var(--neon-green); padding: 12px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .neon-btn:hover { background: var(--neon-green); color: #000; }
+
+        input { background: rgba(255,255,255,0.05); border: 1px solid #444; color: #fff; padding: 12px; width: 100%; margin: 10px 0; outline: none; }
+        input:focus { border-color: var(--neon-blue); }
+
+        .wa-float { position: fixed; bottom: 35px; right: 35px; width: 70px; height: 70px; background: #25d366; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 3000; box-shadow: 0 0 30px #25d366; }
+    </style>
+</head>
+<body onclick="startMusic()">
+
+<canvas id="canvas"></canvas>
+<audio id="bg-audio" loop><source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3" type="audio/mpeg"></audio>
+
+<div class="menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open')">🚀</div>
+
+<div id="auth-gate" style="position:fixed; inset:0; background:#000; z-index:10000; display:flex; align-items:center; justify-content:center;">
+    <div class="auth-box">
+        <h2>X-CORE</h2>
+        <input type="password" id="entry-pass" placeholder="PASSWORD" style="text-align:center;">
+        <button class="neon-btn" style="border-color:var(--neon-purple); color:var(--neon-purple);" onclick="login()">AUTHORIZE</button>
+    </div>
+</div>
+
+<div class="sidebar" id="sidebar">
+    <h3 style="color:var(--neon-purple); text-align:center;">KOMUTA MERKEZİ</h3>
+    <div onclick="showTab('home')">🏠 ANA SAYFA</div>
+    <div onclick="showTab('panel')">⚡ SORGU PANELİ</div>
+    <div onclick="showTab('bomber')">💣 CALL BOMBER</div>
+    <div onclick="showTab('ifsa')">🔞 ARŞİV</div>
+    <div onclick="showTab('device')">📍 KONUM TAKİBİ</div>
+    <div onclick="showTab('proxy')">🌐 PROXY TUNNEL</div>
+    <div onclick="showTab('sms')">📨 SMS SENDER</div>
+    <div onclick="showTab('logs')">📂 SİSTEM LOGLARI</div>
+</div>
+
+<div class="content">
+    <div id="tab-home" class="tab-content active">
+        <div class="card" style="text-align:center; border-color:var(--neon-green);">
+            <h2 style="color:var(--neon-green);">SİSTEM BAĞLANTISI</h2>
+            <div style="font-size:45px; color:#fff; font-weight:bold;">18 <span style="font-size:20px; color:var(--neon-purple);">FF AKTİF 3</span></div>
+            <p style="color:var(--neon-blue);">YALOVA NODE-77 AKTİF</p>
+        </div>
+    </div>
+
+    <div id="tab-panel" class="tab-content">
+        <div class="card" style="text-align:center; border-color:var(--neon-blue);">
+            <h3 style="color:var(--neon-blue);">SORGU PANELİ v2.0</h3>
+            <div class="spinner"></div>
+            <p style="color:var(--neon-purple); font-weight:bold; letter-spacing:2px;">VERİ TABANI GÜNCELLENİYOR</p>
+            <p style="font-size:12px;">Türkiye Cumhuriyeti 2026 MERNİS verileri entegre ediliyor. Çok yakında usta!</p>
+        </div>
+    </div>
+
+    <div id="tab-bomber" class="tab-content">
+        <div class="card" style="text-align:center; border-color:var(--neon-red);">
+            <h3 style="color:var(--neon-red);">CALL BOMBER v6.0</h3>
+            <p>Durum: <span style="color:var(--neon-green);">%40 AKTİF</span></p>
+            <input type="number" placeholder="Hedef Numara (905...)">
+            <button class="neon-btn" style="border-color:var(--neon-red); color:var(--neon-red);">SALDIRI BAŞLAT</button>
+        </div>
+    </div>
+
+    <div id="tab-ifsa" class="tab-content">
+        <div class="card">
+            <h3 style="color:var(--neon-purple);">ÖZEL ARŞİV</h3>
+            <div style="padding:10px; border-bottom:1px solid #222;">E**** Ö*** <button class="neon-btn" style="width:auto; float:right; padding:5px 15px;" onclick="alert('KOD: SAM-18')">BAK</button></div>
+            <div style="padding:10px; border-bottom:1px solid #222; clear:both;">E*** Ş***** Ç******* <button class="neon-btn" style="width:auto; float:right; padding:5px 15px;" onclick="alert('KOD: SAM-FF')">BAK</button></div>
+            <div style="padding:10px; border-bottom:1px solid #222; clear:both;">M*** E*** <button class="neon-btn" style="width:auto; float:right; padding:5px 15px;" onclick="alert('KOD: SAM-03')">BAK</button></div>
+        </div>
+    </div>
+
+    <div id="tab-device" class="tab-content">
+        <div class="card" style="text-align:center;">
+            <h3>GPS KONUM TARAYICI</h3>
+            <input type="text" placeholder="Hedef İsim veya Numara">
+            <button class="neon-btn" onclick="startGPS()">SİNYALİ YAKALA</button>
+            <div id="gps-log" style="display:none; margin-top:20px; font-size:11px; text-align:left; color:var(--neon-green); background:#000; padding:15px; border:1px solid #222;"></div>
+        </div>
+    </div>
+
+    <div id="tab-proxy" class="tab-content"><div class="card"><h3>PROXY TUNNEL</h3><p>IP adresiniz Samanlı üzerinden maskeleniyor...</p></div></div>
+    <div id="tab-sms" class="tab-content"><div class="card"><h3>SMS SENDER</h3><p>Hizmet şu an pasif durumda.</p></div></div>
+    <div id="tab-logs" class="tab-content"><div class="card"><h3>SİSTEM LOGLARI</h3><p>> Admin Login Success<br>> Node-77 Connected<br>> DB Update Required</p></div></div>
+</div>
+
+<a href="https://wa.me/212618074874" class="wa-float"><img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" width="40"></a>
+
+<script>
+    const pass = "Core2024";
+    const audio = document.getElementById('bg-audio');
+
+    function startMusic() { if(audio.paused) { audio.currentTime = 5; audio.volume = 0.4; audio.play(); } }
+    function login() { if(document.getElementById('entry-pass').value === pass) { document.getElementById('auth-gate').style.display='none'; startMusic(); } else alert("DENIED."); }
+    function showTab(id) { document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active')); document.getElementById('tab-' + id).classList.add('active'); document.getElementById('sidebar').classList.remove('open'); }
+
+    function startGPS() {
+        const l = document.getElementById('gps-log'); 
+        l.style.display = 'block'; 
+        l.innerHTML = "Siber ağ taranıyor...<br>";
+        let i = 0;
+        let codes = ["GET /sat/location?id=77", "Bypassing firewall...", "Signal: STABLE", "LAT: 40.65", "LONG: 29.27"];
+        let t = setInterval(() => {
+            l.innerHTML += `> ${codes[i % codes.length]}<br>`;
+            i++;
+            if(i > 8) {
+                clearInterval(t);
+                l.innerHTML += "<br><span style='color:var(--neon-purple)'>SONUÇ: YALOVA / SAMANLI</span><br>Tam adres kodu: <b>LOC-SAM-77</b>";
+            }
+        }, 1200);
+    }
+
+    const canvas = document.getElementById('canvas'); const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+    const drops = Array(Math.floor(canvas.width/16)).fill(1);
+    function draw() {
+        ctx.fillStyle = "rgba(0,0,0,0.05)"; ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.fillStyle = "#bc13fe"; ctx.font = "15px monospace";
+        drops.forEach((y, i) => {
+            ctx.fillText(Math.floor(Math.random()*2), i*16, y*16);
+            if(y*16 > canvas.height && Math.random() > 0.98) drops[i] = 0; drops[i]++;
+        });
+    }
+    setInterval(draw, 50);
+</script>
+</body>
+</html>
