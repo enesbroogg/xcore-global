@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="tr" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Tools Hub</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; padding: 0; font-family: 'Space Grotesk', sans-serif; }
+    
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slideInLeft { from { opacity: 0; transform: translateX(-30px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes glow { 0%, 100% { text-shadow: 0 0 10px rgba(34,197,94,0.8), 0 0 20px rgba(34,197,94,0.4); } 50% { text-shadow: 0 0 20px rgba(34,197,94,1), 0 0 30px rgba(34,197,94,0.6); } }
+    @keyframes neonBorder { 0%, 100% { border-color: rgba(34,197,94,0.5); box-shadow: 0 0 10px rgba(34,197,94,0.3); } 50% { border-color: rgba(34,197,94,0.9); box-shadow: 0 0 20px rgba(34,197,94,0.7); } }
+    @keyframes slideInRight { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+
+    body { background: #ffffff; color: #1a1a1a; }
+    
+    .neon-text { animation: glow 2s ease-in-out infinite; color: #22c55e; font-weight: 700; }
+    .neon-btn { border: 2px solid #22c55e; color: #22c55e; background: transparent; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.3s; animation: neonBorder 3s ease-in-out infinite; }
+    .neon-btn:hover { background: rgba(34,197,94,0.1); box-shadow: 0 0 20px rgba(34,197,94,0.8); transform: scale(1.05); }
+    .neon-btn:active { transform: scale(0.95); }
+    
+    .tool-card { background: white; border: 2px solid #e5e7eb; border-radius: 12px; padding: 24px; transition: all 0.3s; animation: fadeIn 0.6s ease-out backwards; }
+    .tool-card:hover { border-color: #22c55e; box-shadow: 0 0 20px rgba(34,197,94,0.2); transform: translateY(-4px); }
+    
+    .menu-active { border-color: #22c55e; background: rgba(34,197,94,0.05); color: #22c55e; }
+    
+    .glass { background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border: 1px solid rgba(34,197,94,0.2); }
+    
+    .loading-spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid #e5e7eb; border-top-color: #22c55e; border-radius: 50%; animation: pulse 0.8s linear infinite; }
+    
+    .result-box { background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-left: 4px solid #22c55e; padding: 16px; border-radius: 8px; margin-top: 16px; }
+    
+    textarea { font-family: 'Space Grotesk', sans-serif; }
+    input { font-family: 'Space Grotesk', sans-serif; }
+    
+    .fade-in-content { animation: fadeIn 0.5s ease-out; }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full">
+  <div id="app-container" class="h-full w-full bg-white flex flex-col"><!-- Header -->
+   <header class="glass border-b border-gray-200 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 py-6">
+     <div class="flex items-center justify-between">
+      <div>
+       <h1 class="text-3xl font-bold neon-text" id="site-title">AI Tools Hub</h1>
+       <p class="text-sm text-gray-600 mt-1" id="site-subtitle">Yapay Zeka Araçları Merkezi</p>
+      </div>
+      <div class="text-right text-sm text-gray-500">
+       ⚡ Profesyonel AI Araçları
+      </div>
+     </div>
+    </div>
+   </header><!-- Main Content -->
+   <div class="flex-1 overflow-auto">
+    <div class="max-w-7xl mx-auto px-6 py-12"><!-- Menu -->
+     <div class="mb-8 flex flex-wrap gap-3 border-b border-gray-200 pb-6"><button class="menu-item neon-btn menu-active" data-tool="text-to-speech" onclick="switchTool('text-to-speech')"> 🔊 Metin-Ses </button> <button class="menu-item neon-btn" data-tool="retirement-calc" onclick="switchTool('retirement-calc')"> 🎂 Emeklilik Hesaplama </button> <button class="menu-item neon-btn" data-tool="image-gen" onclick="switchTool('image-gen')"> 🎨 Görsel Oluştur </button>
+     </div><!-- Tool 1: Text to Speech -->
+     <div id="text-to-speech-tool" class="tool-section fade-in-content">
+      <div class="tool-card">
+       <h2 class="text-2xl font-bold mb-4">🔊 Metin'den Ses Oluştur</h2>
+       <p class="text-gray-600 mb-6">Yazdığınız metni profesyonel ses ile dinleyin</p>
+       <div class="space-y-4">
+        <div><label class="block text-sm font-600 mb-2">Metniniz:</label> <textarea id="tts-text" rows="4" class="w-full border-2 border-gray-300 rounded-lg p-4 focus:outline-none focus:border-green-500" placeholder="Buraya metninizi yazın...">Merhaba, ben yapay zeka asistanı. Sizi AI Tools Hub'a hoş geldiniz.</textarea>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+         <div><label class="block text-sm font-600 mb-2">Ses Hızı:</label> <input type="range" id="tts-speed" min="0.5" max="2" step="0.1" value="1" class="w-full"> <span class="text-xs text-gray-500">Normal: <span id="speed-value">1.0</span>x</span>
+         </div>
+         <div><label class="block text-sm font-600 mb-2">Ton:</label> <select id="tts-pitch" class="w-full border-2 border-gray-300 rounded-lg p-2"> <option value="0.8">Düşük</option> <option value="1" selected>Normal</option> <option value="1.5">Yüksek</option> </select>
+         </div>
+        </div>
+        <div class="flex gap-3"><button onclick="speakText()" class="neon-btn flex-1">▶️ Seslendir</button> <button onclick="stopSpeech()" class="neon-btn flex-1">⏹️ Durdur</button>
+        </div>
+        <div id="tts-result" class="result-box" style="display: none;">
+         <p class="text-sm text-gray-700"><strong>✅ Ses oynatılıyor...</strong> <span class="loading-spinner" style="display: inline-block; margin-left: 8px;"></span></p>
+        </div>
+       </div>
+      </div>
+     </div><!-- Tool 2: Retirement Calculator -->
+     <div id="retirement-calc-tool" class="tool-section fade-in-content" style="display: none;">
+      <div class="tool-card">
+       <h2 class="text-2xl font-bold mb-4">🎂 Emeklilik Yaşı Hesaplama</h2>
+       <p class="text-gray-600 mb-6">Doğum tarihinize göre emeklilik yaşınızı hesaplayın</p>
+       <div class="space-y-4">
+        <div class="grid grid-cols-2 gap-4">
+         <div><label class="block text-sm font-600 mb-2">Doğum Tarihi:</label> <input type="date" id="birth-date" class="w-full border-2 border-gray-300 rounded-lg p-3 focus:outline-none focus:border-green-500">
+         </div>
+         <div><label class="block text-sm font-600 mb-2">Cinsiyet:</label> <select id="gender" class="w-full border-2 border-gray-300 rounded-lg p-3 focus:outline-none focus:border-green-500"> <option value="male">Erkek</option> <option value="female">Kadın</option> </select>
+         </div>
+        </div>
+        <div><label class="block text-sm font-600 mb-2">Emeklilik Sistemi:</label> <select id="system" class="w-full border-2 border-gray-300 rounded-lg p-3 focus:outline-none focus:border-green-500"> <option value="old">Eski Sistem (36 yıl)</option> <option value="new">Yeni Sistem (25 yıl)</option> <option value="kadın">Kadın Özel (20 yıl)</option> </select>
+        </div><button onclick="calculateRetirement()" class="neon-btn w-full">🧮 Hesapla</button>
+        <div id="retirement-result" class="result-box" style="display: none;">
+         <p class="font-bold text-lg text-green-700 mb-3" id="retirement-age"></p>
+         <p class="text-sm text-gray-700" id="retirement-details"></p>
+        </div>
+       </div>
+      </div>
+     </div><!-- Tool 3: Image Generator -->
+     <div id="image-gen-tool" class="tool-section fade-in-content" style="display: none;">
+      <div class="tool-card">
+       <h2 class="text-2xl font-bold mb-4">🎨 Yapay Zeka ile Görsel Oluştur</h2>
+       <p class="text-gray-600 mb-6">Hayal ettiğiniz görseli sözcüklerle tanımlayın</p>
+       <div class="space-y-4">
+        <div><label class="block text-sm font-600 mb-2">Görsel Açıklaması (Prompt):</label> <textarea id="image-prompt" rows="4" class="w-full border-2 border-gray-300 rounded-lg p-4 focus:outline-none focus:border-green-500" placeholder="Örnek: Gece şehrinde neon ışıklar, çelik mavi tón, futuristik...">Gece şehrinde neon ışıklar, çelik mavi ton, futuristik tasarım</textarea>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+         <div><label class="block text-sm font-600 mb-2">Stil:</label> <select id="image-style" class="w-full border-2 border-gray-300 rounded-lg p-3 focus:outline-none focus:border-green-500"> <option value="realistic">Gerçekçi</option> <option value="illustration">İllüstrasyon</option> <option value="abstract">Soyut</option> <option value="anime">Anime</option> <option value="3d">3D Render</option> </select>
+         </div>
+         <div><label class="block text-sm font-600 mb-2">Renk Paleti:</label> <select id="image-colors" class="w-full border-2 border-gray-300 rounded-lg p-3 focus:outline-none focus:border-green-500"> <option value="vibrant">Canlı Renkler</option> <option value="pastel">Pastel</option> <option value="dark">Koyu Renkler</option> <option value="monochrome">Siyah-Beyaz</option> <option value="neon">Neon</option> </select>
+         </div>
+        </div><button onclick="generateImage()" class="neon-btn w-full">✨ Görsel Oluştur</button>
+        <div id="image-result" style="display: none;">
+         <div class="result-box">
+          <div id="image-container" class="w-full bg-gray-100 rounded-lg overflow-hidden mb-4" style="height: 300px;">
+           <svg width="100%" height="100%" viewbox="0 0 400 300" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center;"><text x="200" y="150" text-anchor="middle" fill="white" font-size="24" font-weight="bold" font-family="'Space Grotesk', sans-serif">
+             🎨 Görsel Oluşturuldu
+            </text>
+           </svg>
+          </div>
+          <p class="text-sm text-gray-700"><strong>Açıklama:</strong> <span id="image-description"></span></p><button onclick="downloadImage()" class="neon-btn w-full mt-3">⬇️ İndir</button>
+         </div>
+        </div>
+       </div>
+      </div>
+     </div>
+    </div>
+   </div><!-- Footer -->
+   <footer class="border-t border-gray-200 bg-gray-50 py-6 text-center text-sm text-gray-600">
+    <p>🚀 AI Tools Hub v1.0 | Yapay Zeka Araçları Merkezi</p>
+   </footer>
+  </div>
+  <script>
+    const defaultConfig = {
+      site_title: 'AI Tools Hub',
+      site_subtitle: 'Yapay Zeka Araçları Merkezi'
+    };
+
+    let currentTool = 'text-to-speech';
+
+    // ─── Element SDK Init ───
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange: async (config) => {
+          document.getElementById('site-title').textContent = config.site_title || defaultConfig.site_title;
+          document.getElementById('site-subtitle').textContent = config.site_subtitle || defaultConfig.site_subtitle;
+        },
+        mapToCapabilities: (config) => ({
+          recolorables: [
+            {
+              get: () => '#22c55e',
+              set: (v) => { window.elementSdk.setConfig({}); }
+            }
+          ],
+          borderables: [],
+          fontEditable: undefined,
+          fontSizeable: undefined
+        }),
+        mapToEditPanelValues: (config) => new Map([
+          ['site_title', config.site_title || defaultConfig.site_title],
+          ['site_subtitle', config.site_subtitle || defaultConfig.site_subtitle]
+        ])
+      });
+    }
+
+    // ─── Tool Switching ───
+    function switchTool(tool) {
+      currentTool = tool;
+      document.querySelectorAll('.tool-section').forEach(el => el.style.display = 'none');
+      document.getElementById(tool + '-tool').style.display = 'block';
+      document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('menu-active'));
+      document.querySelector(`[data-tool="${tool}"]`).classList.add('menu-active');
+    }
+
+    // ─── Text to Speech ───
+    function speakText() {
+      const text = document.getElementById('tts-text').value.trim();
+      if (!text) {
+        alert('Lütfen bir metin girin!');
+        return;
+      }
+
+      const speed = parseFloat(document.getElementById('tts-speed').value);
+      const pitch = parseFloat(document.getElementById('tts-pitch').value);
+
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = speed;
+        utterance.pitch = pitch;
+        utterance.lang = 'tr-TR';
+
+        const result = document.getElementById('tts-result');
+        result.style.display = 'block';
+
+        utterance.onend = () => {
+          result.innerHTML = '<p class="text-sm text-gray-700"><strong>✅ Ses oynatması tamamlandı!</strong></p>';
+          setTimeout(() => { result.style.display = 'none'; }, 3000);
+        };
+
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    function stopSpeech() {
+      window.speechSynthesis.cancel();
+      document.getElementById('tts-result').style.display = 'none';
+    }
+
+    document.getElementById('tts-speed').addEventListener('input', (e) => {
+      document.getElementById('speed-value').textContent = parseFloat(e.target.value).toFixed(1);
+    });
+
+    // ─── Retirement Calculator ───
+    function calculateRetirement() {
+      const birthDate = document.getElementById('birth-date').value;
+      const gender = document.getElementById('gender').value;
+      const system = document.getElementById('system').value;
+
+      if (!birthDate) {
+        alert('Lütfen doğum tarihi seçin!');
+        return;
+      }
+
+      const birth = new Date(birthDate);
+      const today = new Date();
+      let age = today.getFullYear() - birth.getFullYear();
+      const monthDiff = today.getMonth() - birth.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) age--;
+
+      let retirementAge = 65;
+      let workYears = 0;
+
+      if (system === 'old') workYears = 36;
+      else if (system === 'new') workYears = 25;
+      else if (system === 'kadın') workYears = 20;
+
+      const retirementDate = new Date(birth);
+      retirementDate.setFullYear(retirementDate.getFullYear() + (retirementAge + (workYears - 30)));
+
+      const result = document.getElementById('retirement-result');
+      const ageEl = document.getElementById('retirement-age');
+      const detailsEl = document.getElementById('retirement-details');
+
+      ageEl.textContent = `Emeklilik Yaşı: ${Math.min(age + workYears, 75)} Yaş`;
+      detailsEl.innerHTML = `
+        <strong>Bilgiler:</strong><br>
+        • Doğum Tarihi: ${birth.toLocaleDateString('tr-TR')}<br>
+        • Şu Anki Yaş: ${age}<br>
+        • Gerekli Çalışma Yılı: ${workYears} yıl<br>
+        • Tahmini Emeklilik Tarihi: ${retirementDate.toLocaleDateString('tr-TR')}<br>
+        • Kalan Çalışma Süresi: ~${Math.max(0, Math.floor((retirementDate - today) / (365 * 24 * 60 * 60 * 1000)))} gün
+      `;
+      result.style.display = 'block';
+    }
+
+    // ─── Image Generator ───
+    function generateImage() {
+      const prompt = document.getElementById('image-prompt').value.trim();
+      if (!prompt) {
+        alert('Lütfen bir açıklama girin!');
+        return;
+      }
+
+      const style = document.getElementById('image-style').value;
+      const colors = document.getElementById('image-colors').value;
+
+      const resultDiv = document.getElementById('image-result');
+      resultDiv.style.display = 'block';
+
+      // Generate SVG based on style and colors
+      const colorMap = {
+        vibrant: ['#FF6B6B', '#4ECDC4', '#FFE66D', '#95E1D3'],
+        pastel: ['#FFB3BA', '#FFCCCB', '#FFFFCC', '#CCFFCC'],
+        dark: ['#1a1a1a', '#333333', '#4a4a4a', '#666666'],
+        monochrome: ['#000000', '#333333', '#666666', '#999999'],
+        neon: ['#00FF00', '#00FFFF', '#FF00FF', '#FFFF00']
+      };
+
+      const colorSet = colorMap[colors] || colorMap.vibrant;
+
+      let svgContent = `<svg width="100%" height="100%" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:${colorSet[0]};stop-opacity:1" />
+            <stop offset="100%" style="stop-color:${colorSet[1]};stop-opacity:1" />
+          </linearGradient>
+        </defs>`;
+
+      if (style === 'realistic') {
+        svgContent += `
+          <rect width="400" height="300" fill="url(#grad1)"/>
+          <circle cx="100" cy="100" r="60" fill="${colorSet[2]}" opacity="0.8"/>
+          <circle cx="300" cy="200" r="50" fill="${colorSet[3]}" opacity="0.6"/>
+          <path d="M 50 250 Q 200 200 350 250" stroke="${colorSet[0]}" stroke-width="3" fill="none"/>
+        `;
+      } else if (style === 'illustration') {
+        svgContent += `
+          <rect width="400" height="300" fill="${colorSet[0]}"/>
+          <ellipse cx="200" cy="150" rx="100" ry="80" fill="${colorSet[1]}"/>
+          <circle cx="170" cy="130" r="15" fill="white"/>
+          <circle cx="230" cy="130" r="15" fill="white"/>
+          <path d="M 175 160 Q 200 175 225 160" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/>
+        `;
+      } else if (style === 'abstract') {
+        svgContent += `
+          <rect width="400" height="300" fill="${colorSet[0]}"/>
+          <polygon points="100,50 200,100 150,200" fill="${colorSet[1]}" opacity="0.8"/>
+          <rect x="200" y="100" width="150" height="150" fill="${colorSet[2]}" opacity="0.7" transform="rotate(25 275 175)"/>
+          <circle cx="100" cy="250" r="50" fill="${colorSet[3]}" opacity="0.6"/>
+        `;
+      } else if (style === 'anime') {
+        svgContent += `
+          <rect width="400" height="300" fill="#87CEEB"/>
+          <circle cx="200" cy="100" r="40" fill="${colorSet[0]}"/>
+          <circle cx="175" cy="85" r="8" fill="white"/>
+          <circle cx="225" cy="85" r="8" fill="white"/>
+          <circle cx="175" cy="88" r="4" fill="black"/>
+          <circle cx="225" cy="88" r="4" fill="black"/>
+          <path d="M 180 110 Q 200 120 220 110" stroke="black" stroke-width="2" fill="none"/>
+          <rect x="100" y="200" width="200" height="80" fill="${colorSet[1]}" rx="5"/>
+        `;
+      } else if (style === '3d') {
+        svgContent += `
+          <defs>
+            <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+              <feDropShadow dx="3" dy="3" stdDeviation="5" flood-opacity="0.3"/>
+            </filter>
+          </defs>
+          <polygon points="150,50 250,100 200,200" fill="${colorSet[0]}" filter="url(#shadow)"/>
+          <polygon points="250,100 300,150 200,200" fill="${colorSet[1]}" filter="url(#shadow)"/>
+          <polygon points="150,50 200,100 200,200" fill="${colorSet[2]}" filter="url(#shadow)"/>
+        `;
+      }
+
+      svgContent += `<text x="200" y="280" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="12" font-family="'Space Grotesk'">Yapay Zeka Tarafından Oluşturuldu</text></svg>`;
+
+      document.getElementById('image-container').innerHTML = svgContent;
+      document.getElementById('image-description').textContent = `${prompt} (${style}, ${colors})`;
+    }
+
+    function downloadImage() {
+      const svg = document.getElementById('image-container').querySelector('svg');
+      if (!svg) return;
+
+      const svgString = new XMLSerializer().serializeToString(svg);
+      const canvas = document.createElement('canvas');
+      canvas.width = 400;
+      canvas.height = 300;
+
+      const img = new Image();
+      img.onload = () => {
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        const link = document.createElement('a');
+        link.href = canvas.toDataURL('image/png');
+        link.download = 'ai-generated-image.png';
+        link.click();
+      };
+      img.src = 'data:image/svg+xml;base64,' + btoa(svgString);
+    }
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9cdc85a6e676e206',t:'MTc3MTA3MTY1My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
